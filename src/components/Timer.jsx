@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
 
 export const Timer = () => {
-  const [timerMinutes, setTimerMinutes] = useState(25); //25*60 Стартуем с 25 минут
+  const [timerMinutes, setTimerMinutes] = useState(10); //25*60 Стартуем с 25 минут
   const [timerState, setTimerState] = useState("stop");
-  const [pomidorka, setPomidorka] = useState("work");
+  const [timerStatus, setTimerStatus] = useState("work");
   const seconds = timerMinutes % 60; // Получаем секунды
   const minutes = (timerMinutes / 60) % 60; // Получаем минуты
 
@@ -24,26 +26,7 @@ export const Timer = () => {
     return strTimer;
   };
 
-  console.log("timerMinutes", timerMinutes);
-
-  const timerTick = () => {
-    setTimerMinutes(timerMinutes - 1);
-  };
-
-  const setPomidorTimer = () => {
-    if (pomidorka === "work" && timerMinutes === 0) {
-      setPomidorka("break");
-      setTimerMinutes(5);
-    } else if (pomidorka === "break" && timerMinutes === 0) {
-      setPomidorka("work");
-      setTimerMinutes(25);
-    }
-  };
-
-  console.log("pomidorka:", pomidorka);
-
   const handleClick = () => {
-    console.log("Click");
     if (timerState === "stop") {
       setTimerState("start");
       return;
@@ -51,14 +34,19 @@ export const Timer = () => {
     setTimerState("stop");
   };
 
-  console.log("timerState:", timerState);
-
   useEffect(() => {
-    console.log("use effect");
+    const setPomidorTimer = () => {
+      if (timerStatus === "work" && timerMinutes === 0) {
+        setTimerStatus("break");
+        setTimerMinutes(5);
+      } else if (timerStatus === "break" && timerMinutes === 0) {
+        setTimerStatus("work");
+        setTimerMinutes(10);
+      }
+    };
     const timer = setInterval(() => {
-      console.log("use effect timerMinutes:", timerMinutes);
       if (timerState === "start") {
-        timerTick();
+        setTimerMinutes(timerMinutes - 1);
         if (timerMinutes <= 0) {
           setPomidorTimer();
           return;
@@ -68,17 +56,26 @@ export const Timer = () => {
         return;
       }
     }, 1000);
-    console.log("strTimer:", strTimerValue());
     return () => {
       clearInterval(timer);
     };
-  }, [timerMinutes, timerState]);
+  }, [timerMinutes, timerState, timerStatus]);
 
   return (
-    <div className="clock">
-      <h1>Pomidorka timer</h1>
-      <h2>{strTimerValue()}</h2>
-      <button onClick={handleClick}>play</button>
-    </div>
+    <section
+      className={timerStatus === "work" ? "pomidorka" : "pomidorka resting"}
+    >
+      <div>
+        <Header />
+        <div className="clock">
+          <h2>{strTimerValue()}</h2>
+          <div
+            className={timerState === "stop" ? "button pause" : "button play"}
+            onClick={handleClick}
+          />
+        </div>
+        <Footer />
+      </div>
+    </section>
   );
 };
